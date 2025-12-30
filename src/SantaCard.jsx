@@ -15,14 +15,13 @@ export default function SantaCard({ open, initial, onClose, onSave }) {
   }, [open, onClose])
 
   const share = async () => {
-    const url = new URL(window.location.href)
-    url.searchParams.set('msg', text)
-    const shareUrl = url.toString()
+    // Privacy-first: do not embed message in URL
+    const shareUrl = window.location.origin + window.location.pathname
     if (navigator.share) {
       try { await navigator.share({ title: 'New Year Greeting', text, url: shareUrl }) } catch (e) {}
     } else if (navigator.clipboard) {
       await navigator.clipboard.writeText(shareUrl)
-      alert('Copied share link to clipboard!')
+      alert('Copied share link (without message param)!')
     } else {
       prompt('Copy this link', shareUrl)
     }
@@ -41,7 +40,7 @@ export default function SantaCard({ open, initial, onClose, onSave }) {
           <button onClick={share}>แชร์ลิงก์</button>
           <button onClick={onClose}>ปิด</button>
         </div>
-        <p className="card-hint">ลิงก์แชร์จะบันทึกข้อความไว้ในพารามิเตอร์ '?msg='</p>
+        <p className="card-hint">ลิงก์แชร์จะไม่บันทึกข้อความลง URL เพื่อความเป็นส่วนตัว</p>
       </div>
     </div>
   )

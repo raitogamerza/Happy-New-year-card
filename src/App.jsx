@@ -16,8 +16,12 @@ function App() {
   const fwContainerRef = useRef(null)
   const [treeSize, setTreeSize] = useState({ w: 420, h: 380 })
   const [message, setMessage] = useState(() => {
-    const sp = new URLSearchParams(window.location.search)
-    return sp.get('msg') || 'ขอให้สุขภาพเเข็งเเรง และมีความสุขตลอดปีใหม่'
+    try {
+      const saved = localStorage.getItem('ny-message')
+      return saved || 'ขอให้สุขภาพเเข็งเเรง และมีความสุขตลอดปีใหม่'
+    } catch {
+      return 'ขอให้สุขภาพเเข็งเเรง และมีความสุขตลอดปีใหม่'
+    }
   })
   const [cardOpen, setCardOpen] = useState(false)
   const audioRef = useRef(null)
@@ -91,9 +95,7 @@ function App() {
 
   const saveMessage = (txt) => {
     setMessage(txt)
-    const url = new URL(window.location.href)
-    url.searchParams.set('msg', txt)
-    window.history.replaceState({}, '', url)
+    try { localStorage.setItem('ny-message', txt) } catch {}
   }
 
   return (
