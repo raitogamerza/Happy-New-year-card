@@ -11,8 +11,8 @@ export default function SantaSleigh({ onClick }) {
     <div className="santa-sleigh" role="button" tabIndex={0} aria-label="Santa sleigh" title="Santa" onClick={onClick} onKeyDown={onKey}>
       <svg className="santa-svg" width="360" height="140" viewBox="0 0 360 140" role="img" aria-label="Santa sleigh">
         <g className="santa-bob" transform="translate(0,0)">
-          {/* Reindeers */}
-          <g className="reindeers" transform="translate(20,70)">
+          {/* Reindeers - lifted slightly */}
+          <g className="reindeers" transform="translate(20,56)">
             {Array.from({ length: 3 }).map((_, i) => {
               const dx = i * 80
               const isLead = i === 0
@@ -35,8 +35,8 @@ export default function SantaSleigh({ onClick }) {
             })}
           </g>
 
-          {/* Sleigh + Santa */}
-          <g className="sleigh" transform="translate(260,82)">
+          {/* Sleigh + Santa - lifted slightly */}
+          <g className="sleigh" transform="translate(260,66)">
             {/* sled runners */}
             <path d="M-40 22 h70 c10 0 10 10 0 10 h-80" stroke="#7a0c13" strokeWidth="4" fill="none" />
             {/* sleigh body */}
@@ -54,8 +54,8 @@ export default function SantaSleigh({ onClick }) {
             </g>
           </g>
 
-          {/* trailing sparkles */}
-          <g className="trail" transform="translate(220,82)">
+          {/* trailing sparkles - match lift */}
+          <g className="trail" transform="translate(220,66)">
             {Array.from({ length: 10 }).map((_, i) => (
               <circle key={i} cx={-i * 16} cy={(Math.sin(i) * 6).toFixed(1)} r="2.6" fill="#ffd23f" className="spark" style={{ '--d': `${i * 0.12}s` }} />
             ))}

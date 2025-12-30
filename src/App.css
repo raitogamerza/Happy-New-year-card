@@ -328,7 +328,7 @@
 /* Flying Santa Sleigh */
 .santa-sleigh {
   position: fixed;
-  top: 10%;
+  top: 6%; /* lift up to avoid overlapping text */
   left: -40vw;
   z-index: 95;
   pointer-events: auto;

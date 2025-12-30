@@ -160,8 +160,9 @@ export default function SnowAccumulation() {
     if (!ctx) return
     let swiping = false
     function isSwipeGesture(evt) {
-      if (evt.touches && evt.touches.length >= 2) return true // two-finger on mobile
-      if (!evt.touches && (evt.shiftKey || (evt.buttons === 2))) return true // desktop: hold Shift or right mouse
+      if (evt.touches && evt.touches.length >= 2) return true // mobile: two-finger swipe
+      // desktop: allow left mouse drag OR Shift/right-click for precision
+      if (!evt.touches && (evt.buttons === 1 || evt.shiftKey || evt.buttons === 2)) return true
       return false
     }
     function start(e) {
@@ -203,9 +204,11 @@ export default function SnowAccumulation() {
     }
   }, [ctx])
 
-  // Auto fill every 5 minutes
+  // Auto fill on mobile immediately, and every 5 minutes thereafter
   useEffect(() => {
     if (!ctx) return
+    // mobile-first full white screen of snow
+    if (window.innerWidth <= 480) fillNow()
     const id = setInterval(() => fillNow(), 5 * 60 * 1000)
     return () => clearInterval(id)
   }, [ctx, fillNow])
@@ -215,7 +218,7 @@ export default function SnowAccumulation() {
       <canvas ref={canvasRef} className="snow-accum" />
       {hintVisible && (
         <div className={`snow-hint ${isFull ? 'show' : ''}`}>
-          <div className="snow-hint-text">หิมะเต็มแล้ว ใช้สองนิ้วปัดเพื่อลบ</div>
+          <div className="snow-hint-text">หิมะเต็มแล้ว: มือถือใช้สองนิ้ว, คอมลากเมาส์เพื่อปัด</div>
           <div className="snow-hint-bar"><span style={{ width: `${Math.round(levelRef.current * 100)}%` }} /></div>
         </div>
       )}
