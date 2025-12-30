@@ -141,15 +141,47 @@ function AudioPlayerImpl({ src = '/music.mp3', onSetSrc }, ref) {
     }
   }), [])
 
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth <= 480 : false)
+  useEffect(() => {
+    function onResize() { setIsMobile(window.innerWidth <= 480) }
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
+
+  const containerStyle = {
+    position: 'fixed',
+    bottom: 12,
+    left: isMobile ? 12 : 16,
+    right: isMobile ? 12 : 'auto',
+    zIndex: 120,
+    display: 'flex',
+    gap: 8,
+    alignItems: 'center',
+    flexWrap: isMobile ? 'wrap' : 'nowrap',
+    background: 'rgba(0,0,0,0.5)',
+    borderRadius: 12,
+    padding: '8px 10px'
+  }
+
+  const inputStyle = {
+    width: isMobile ? '100%' : 220,
+    minWidth: isMobile ? '100%' : 0,
+    padding: '6px 8px',
+    borderRadius: 8,
+    border: '1px solid #374151',
+    color: '#fff',
+    background: 'rgba(0,0,0,0.35)'
+  }
+
   return (
-    <div style={{ position: 'fixed', bottom: 16, left: 16, zIndex: 120, display: 'flex', gap: 8, alignItems: 'center', background: 'rgba(0,0,0,0.5)', borderRadius: 12, padding: '6px 10px' }}>
+    <div style={containerStyle}>
       <button onClick={toggle} style={{ background: '#1f2937', color: '#fff', border: '1px solid #374151', borderRadius: 10, padding: '6px 10px' }}>
         {playing ? 'หยุดเพลง' : 'เล่นเพลง'}
       </button>
       <span style={{ color: '#fff', opacity: 0.8, fontSize: 12 }}>{ready ? 'พร้อมเล่น' : 'กำลังโหลด...'}</span>
       {!isYouTube && <audio ref={audioRef} src={src} loop preload="auto" />}
       {isYouTube && <div ref={ytRef} style={{ width: 0, height: 0, overflow: 'hidden' }} />}
-      <input value={inputUrl} onChange={(e)=>setInputUrl(e.target.value)} placeholder="วางลิงก์ YouTube หรือ MP3" style={{ width: 220, padding: '6px 8px', borderRadius: 8, border: '1px solid #374151', color: '#fff', background: 'rgba(0,0,0,0.35)' }} />
+      <input value={inputUrl} onChange={(e)=>setInputUrl(e.target.value)} placeholder="วางลิงก์ YouTube หรือ MP3" style={inputStyle} />
       <button onClick={()=>{ onSetSrc && onSetSrc(inputUrl); }} style={{ background: '#374151', color: '#fff', border: '1px solid #4b5563', borderRadius: 10, padding: '6px 10px' }}>ตั้งเพลง</button>
       <button onClick={async ()=>{
         const url = new URL(window.location.href)
