@@ -10,6 +10,7 @@ function AudioPlayerImpl({ src = '/music.mp3', onSetSrc }, ref) {
   const [needsGesture, setNeedsGesture] = useState(false)
   const [localFileLabel, setLocalFileLabel] = useState('')
   const localBlobUrlRef = useRef(null)
+  const [loadError, setLoadError] = useState('')
 
   const isYouTube = /youtu\.be|youtube\.com/i.test(src)
 
@@ -38,7 +39,16 @@ function AudioPlayerImpl({ src = '/music.mp3', onSetSrc }, ref) {
     const a = audioRef.current
     if (!a) return
     function onCanPlay() { setReady(true) }
-    function onError() { setReady(false) }
+    function onError() {
+      setReady(false)
+      const code = a.error && a.error.code
+      let msg = 'โหลดเพลงไม่ได้'
+      if (code === 1) msg = 'เกิดข้อผิดพลาด (MEDIA_ERR_ABORTED)'
+      else if (code === 2) msg = 'เครือข่ายมีปัญหา หรือ URL ใช้งานไม่ได้'
+      else if (code === 3) msg = 'ไฟล์เสียงไม่รองรับ หรือถูกบล็อก (CORS/ชนิดไฟล์)'
+      else if (code === 4) msg = 'รูปแบบไฟล์ไม่รองรับในเบราว์เซอร์นี้'
+      setLoadError(msg)
+    }
     a.addEventListener('canplay', onCanPlay)
     a.addEventListener('error', onError)
     return () => {
@@ -107,6 +117,7 @@ function AudioPlayerImpl({ src = '/music.mp3', onSetSrc }, ref) {
     } else {
       const a = audioRef.current
       if (!a) return
+      if (!a.src) { setLoadError('ยังไม่ตั้งเพลง (กรุณาวาง URL MP3 แล้วกด "ตั้งเพลง" หรือเลือกไฟล์ในเครื่อง)'); return }
       try {
         if (!playing) {
           await a.play()
@@ -131,6 +142,7 @@ function AudioPlayerImpl({ src = '/music.mp3', onSetSrc }, ref) {
       } else {
         const a = audioRef.current
         if (!a) return
+        if (!a.src) { setLoadError('ยังไม่ตั้งเพลง'); return }
         try {
           await a.play()
           setPlaying(true)
@@ -192,7 +204,7 @@ function AudioPlayerImpl({ src = '/music.mp3', onSetSrc }, ref) {
         {playing ? 'หยุดเพลง' : 'เล่นเพลง'}
       </button>
       <span style={{ color: '#fff', opacity: 0.8, fontSize: 12 }}>
-        {ready ? 'พร้อมเล่น' : 'กำลังโหลด...'}{needsGesture ? ' • แตะปุ่ม "เล่นเพลง" เพื่อเริ่มใน IG/LINE' : ''}
+        {loadError ? `ข้อผิดพลาด: ${loadError}` : (ready ? 'พร้อมเล่น' : 'กำลังโหลด...')}{needsGesture ? ' • แตะปุ่ม "เล่นเพลง" เพื่อเริ่มใน IG/LINE' : ''}
       </span>
       {!isYouTube && <audio ref={audioRef} src={src} loop preload="auto" playsInline crossOrigin="anonymous" />}
       {isYouTube && <div ref={ytRef} style={{ width: 0, height: 0, overflow: 'hidden' }} />}

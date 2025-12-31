@@ -29,7 +29,8 @@ function App() {
   const audioRef = useRef(null)
   const [trackSrc, setTrackSrc] = useState(() => {
     const sp = new URLSearchParams(window.location.search)
-    return sp.get('track') || '/music.mp3'
+    // ใช้ค่าเริ่มต้นว่าง เพื่อหลีกเลี่ยงการชี้ไปที่ไฟล์ที่ไม่มีจริง
+    return sp.get('track') || ''
   })
 
   // After initial load, remove `msg` from URL to hide the message in the address bar
