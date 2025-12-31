@@ -7,6 +7,7 @@ function AudioPlayerImpl({ src = '/music.mp3', onSetSrc }, ref) {
   const [playing, setPlaying] = useState(false)
   const [ready, setReady] = useState(false)
   const [inputUrl, setInputUrl] = useState(src)
+  const [needsGesture, setNeedsGesture] = useState(false)
 
   const isYouTube = /youtu\.be|youtube\.com/i.test(src)
 
@@ -35,8 +36,13 @@ function AudioPlayerImpl({ src = '/music.mp3', onSetSrc }, ref) {
     const a = audioRef.current
     if (!a) return
     function onCanPlay() { setReady(true) }
+    function onError() { setReady(false) }
     a.addEventListener('canplay', onCanPlay)
-    return () => a.removeEventListener('canplay', onCanPlay)
+    a.addEventListener('error', onError)
+    return () => {
+      a.removeEventListener('canplay', onCanPlay)
+      a.removeEventListener('error', onError)
+    }
   }, [isYouTube])
 
   // YouTube IFrame API loader and player setup
@@ -92,7 +98,10 @@ function AudioPlayerImpl({ src = '/music.mp3', onSetSrc }, ref) {
       if (!p) return
       try {
         if (!playing) { p.playVideo(); setPlaying(true) } else { p.pauseVideo(); setPlaying(false) }
-      } catch (e) { console.warn('YouTube play failed:', e) }
+      } catch (e) {
+        console.warn('YouTube play failed:', e)
+        setNeedsGesture(true)
+      }
     } else {
       const a = audioRef.current
       if (!a) return
@@ -106,6 +115,7 @@ function AudioPlayerImpl({ src = '/music.mp3', onSetSrc }, ref) {
         }
       } catch (e) {
         console.warn('Audio play failed (user gesture required?):', e)
+        setNeedsGesture(true)
       }
     }
   }
@@ -124,6 +134,7 @@ function AudioPlayerImpl({ src = '/music.mp3', onSetSrc }, ref) {
           setPlaying(true)
         } catch (e) {
           console.warn('Audio play failed:', e)
+          setNeedsGesture(true)
         }
       }
     },
@@ -178,8 +189,10 @@ function AudioPlayerImpl({ src = '/music.mp3', onSetSrc }, ref) {
       <button onClick={toggle} style={{ background: '#1f2937', color: '#fff', border: '1px solid #374151', borderRadius: 10, padding: '6px 10px' }}>
         {playing ? 'หยุดเพลง' : 'เล่นเพลง'}
       </button>
-      <span style={{ color: '#fff', opacity: 0.8, fontSize: 12 }}>{ready ? 'พร้อมเล่น' : 'กำลังโหลด...'}</span>
-      {!isYouTube && <audio ref={audioRef} src={src} loop preload="auto" />}
+      <span style={{ color: '#fff', opacity: 0.8, fontSize: 12 }}>
+        {ready ? 'พร้อมเล่น' : 'กำลังโหลด...'}{needsGesture ? ' • แตะปุ่ม "เล่นเพลง" เพื่อเริ่มใน IG/LINE' : ''}
+      </span>
+      {!isYouTube && <audio ref={audioRef} src={src} loop preload="auto" playsInline crossOrigin="anonymous" />}
       {isYouTube && <div ref={ytRef} style={{ width: 0, height: 0, overflow: 'hidden' }} />}
       <input value={inputUrl} onChange={(e)=>setInputUrl(e.target.value)} placeholder="วางลิงก์ YouTube หรือ MP3" style={inputStyle} />
       <button onClick={()=>{ onSetSrc && onSetSrc(inputUrl); }} style={{ background: '#374151', color: '#fff', border: '1px solid #4b5563', borderRadius: 10, padding: '6px 10px' }}>ตั้งเพลง</button>
