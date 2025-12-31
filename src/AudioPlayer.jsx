@@ -8,6 +8,8 @@ function AudioPlayerImpl({ src = '/music.mp3', onSetSrc }, ref) {
   const [ready, setReady] = useState(false)
   const [inputUrl, setInputUrl] = useState(src)
   const [needsGesture, setNeedsGesture] = useState(false)
+  const [localFileLabel, setLocalFileLabel] = useState('')
+  const localBlobUrlRef = useRef(null)
 
   const isYouTube = /youtu\.be|youtube\.com/i.test(src)
 
@@ -195,7 +197,42 @@ function AudioPlayerImpl({ src = '/music.mp3', onSetSrc }, ref) {
       {!isYouTube && <audio ref={audioRef} src={src} loop preload="auto" playsInline crossOrigin="anonymous" />}
       {isYouTube && <div ref={ytRef} style={{ width: 0, height: 0, overflow: 'hidden' }} />}
       <input value={inputUrl} onChange={(e)=>setInputUrl(e.target.value)} placeholder="วางลิงก์ YouTube หรือ MP3" style={inputStyle} />
-      <button onClick={()=>{ onSetSrc && onSetSrc(inputUrl); }} style={{ background: '#374151', color: '#fff', border: '1px solid #4b5563', borderRadius: 10, padding: '6px 10px' }}>ตั้งเพลง</button>
+      <button onClick={()=>{
+        // ไม่ตั้งค่าลิงก์ blob: ลง URL ที่แชร์ เพื่อหลีกเลี่ยงลิงก์ใช้ไม่ได้
+        if (inputUrl && !/^blob:/i.test(inputUrl)) {
+          onSetSrc && onSetSrc(inputUrl)
+        }
+      }} style={{ background: '#374151', color: '#fff', border: '1px solid #4b5563', borderRadius: 10, padding: '6px 10px' }}>ตั้งเพลง</button>
+
+      {/* เลือกไฟล์ MP3 ในเครื่อง สำหรับ LINE/IG */}
+      <label style={{ background: '#374151', color: '#fff', border: '1px solid #4b5563', borderRadius: 10, padding: '6px 10px', cursor: 'pointer' }}>
+        ใช้ไฟล์ MP3 ในเครื่อง
+        <input
+          type="file"
+          accept="audio/mpeg,audio/mp3,audio/*"
+          onChange={(e) => {
+            try {
+              const file = e.target.files && e.target.files[0]
+              if (!file) return
+              setLocalFileLabel(file.name || 'ไฟล์เสียง')
+              // cleanup blob URL เดิม
+              if (localBlobUrlRef.current) { URL.revokeObjectURL(localBlobUrlRef.current); localBlobUrlRef.current = null }
+              const objUrl = URL.createObjectURL(file)
+              localBlobUrlRef.current = objUrl
+              const a = audioRef.current
+              if (a) {
+                a.src = objUrl
+                setReady(false)
+                setNeedsGesture(false)
+                a.oncanplay = () => setReady(true)
+              }
+              setPlaying(false)
+            } catch {}
+          }}
+          style={{ display: 'none' }}
+        />
+      </label>
+      {localBlobUrlRef.current && <span style={{ color: '#fff', opacity: 0.75, fontSize: 12 }}>เลือกแล้ว: {localFileLabel}</span>}
       {/* ปุ่มแชร์เพลงถูกนำออกตามคำขอ */}
     </div>
   )
