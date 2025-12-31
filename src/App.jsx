@@ -3,7 +3,7 @@ import SantaSleigh from './SantaSleigh'
 import Tree3D from './Tree3D'
 import ConfettiBurst from './ConfettiBurst'
 import AnimatedText from './AnimatedText'
-import SnowAccumulation from './SnowAccumulation'
+// SnowAccumulation disabled per request
 import SantaCard from './SantaCard'
 import AudioPlayer from './AudioPlayer'
 import { useEffect, useRef, useState } from 'react'
@@ -20,8 +20,7 @@ function App() {
       const sp = new URLSearchParams(window.location.search)
       const msg = sp.get('msg')
       if (msg) return msg
-      const saved = localStorage.getItem('ny-message')
-      return saved || 'ขอให้สุขภาพเเข็งเเรง และมีความสุขตลอดปีใหม่'
+      return 'ขอให้สุขภาพเเข็งเเรง และมีความสุขตลอดปีใหม่'
     } catch {
       return 'ขอให้สุขภาพเเข็งเเรง และมีความสุขตลอดปีใหม่'
     }
@@ -98,7 +97,6 @@ function App() {
 
   const saveMessage = (txt) => {
     setMessage(txt)
-    try { localStorage.setItem('ny-message', txt) } catch {}
   }
 
   return (
@@ -122,7 +120,7 @@ function App() {
             <div className="tree-wrap">
               <Tree3D width={treeSize.w} height={treeSize.h} interactive={true} />
             </div>
-            {isOpen && <SnowAccumulation />}
+            {/* ปิดการสะสมหิมะเพื่อไม่ให้เต็มหน้าจอ */}
             <SantaCard open={cardOpen} initial={message} onClose={() => setCardOpen(false)} onSave={saveMessage} />
           </div>
         )}
