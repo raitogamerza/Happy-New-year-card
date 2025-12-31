@@ -17,6 +17,9 @@ function App() {
   const [treeSize, setTreeSize] = useState({ w: 420, h: 380 })
   const [message, setMessage] = useState(() => {
     try {
+      const sp = new URLSearchParams(window.location.search)
+      const msg = sp.get('msg')
+      if (msg) return msg
       const saved = localStorage.getItem('ny-message')
       return saved || 'ขอให้สุขภาพเเข็งเเรง และมีความสุขตลอดปีใหม่'
     } catch {
