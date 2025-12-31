@@ -183,19 +183,7 @@ function AudioPlayerImpl({ src = '/music.mp3', onSetSrc }, ref) {
       {isYouTube && <div ref={ytRef} style={{ width: 0, height: 0, overflow: 'hidden' }} />}
       <input value={inputUrl} onChange={(e)=>setInputUrl(e.target.value)} placeholder="วางลิงก์ YouTube หรือ MP3" style={inputStyle} />
       <button onClick={()=>{ onSetSrc && onSetSrc(inputUrl); }} style={{ background: '#374151', color: '#fff', border: '1px solid #4b5563', borderRadius: 10, padding: '6px 10px' }}>ตั้งเพลง</button>
-      <button onClick={async ()=>{
-        const url = new URL(window.location.href)
-        url.searchParams.set('track', src)
-        const shareUrl = url.toString()
-        if (navigator.share) {
-          try { await navigator.share({ title: 'New Year Music', url: shareUrl }) } catch {}
-        } else if (navigator.clipboard) {
-          await navigator.clipboard.writeText(shareUrl)
-          alert('คัดลอกลิงก์เพลงแล้ว!')
-        } else {
-          prompt('Copy this link', shareUrl)
-        }
-      }} style={{ background: '#1d4ed8', color: '#fff', border: '1px solid #1e40af', borderRadius: 10, padding: '6px 10px' }}>แชร์เพลง</button>
+      {/* ปุ่มแชร์เพลงถูกนำออกตามคำขอ */}
     </div>
   )
 }

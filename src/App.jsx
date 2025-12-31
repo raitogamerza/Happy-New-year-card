@@ -32,7 +32,26 @@ function App() {
     return sp.get('track') || '/music.mp3'
   })
 
+  // After initial load, remove `msg` from URL to hide the message in the address bar
   useEffect(() => {
+    try {
+      const U = new URL(window.location.href)
+      if (U.searchParams.has('msg')) {
+        U.searchParams.delete('msg')
+        window.history.replaceState({}, '', U)
+      }
+    } catch {}
+  }, [])
+
+  useEffect(() => {
+    // If message was shared via URL, remove it from the address bar after loading it
+    try {
+      const U = new URL(window.location.href)
+      if (U.searchParams.has('msg')) {
+        U.searchParams.delete('msg')
+        window.history.replaceState({}, '', U)
+      }
+    } catch {}
     if (!isOpen || !fwContainerRef.current) return
 
     const options = {
@@ -127,6 +146,7 @@ function App() {
         {/* Render AudioPlayer always so it's mounted before the envelope click */}
         <AudioPlayer ref={audioRef} src={trackSrc} onSetSrc={(url)=>{
           setTrackSrc(url)
+          // เขียนเพลงลง URL เพื่อให้ผู้รับเห็นเพลงที่ตั้งไว้
           const U = new URL(window.location.href)
           U.searchParams.set('track', url)
           window.history.replaceState({}, '', U)

@@ -15,15 +15,27 @@ export default function SantaCard({ open, initial, onClose, onSave }) {
   }, [open, onClose])
 
   const share = async () => {
-    // Build a share URL that preserves current page params and includes the card message
+    // Ask for sender's name; include both name and message in shared URL (message will be removed from URL after load)
+    const name = window.prompt('กรอกชื่อของคุณสำหรับการ์ด', '')
+    if (name === null) return // cancel
     const url = new URL(window.location.href)
-    url.searchParams.set('msg', text || '')
+    const nameTrim = (name || '').trim()
+    if (nameTrim) url.searchParams.set('name', nameTrim)
+    else url.searchParams.delete('name')
+    const msgTrim = (text || '').trim()
+    if (msgTrim) url.searchParams.set('msg', msgTrim)
+    else url.searchParams.delete('msg')
     const shareUrl = url.toString()
+    const shareText = [
+      nameTrim ? `จาก: ${nameTrim}` : null,
+      msgTrim || null,
+    ].filter(Boolean).join('\n')
     if (navigator.share) {
-      try { await navigator.share({ title: 'New Year Greeting', text, url: shareUrl }) } catch (e) {}
+      try { await navigator.share({ title: 'New Year Greeting', text: shareText, url: shareUrl }) } catch (e) {}
     } else if (navigator.clipboard) {
-      await navigator.clipboard.writeText(shareUrl)
-      alert('คัดลอกลิงก์การ์ดแล้ว!')
+      const composite = shareText ? `${shareText}\n${shareUrl}` : shareUrl
+      await navigator.clipboard.writeText(composite)
+      alert('คัดลอกข้อความและลิงก์แล้ว!')
     } else {
       prompt('Copy this link', shareUrl)
     }
@@ -42,7 +54,7 @@ export default function SantaCard({ open, initial, onClose, onSave }) {
           <button onClick={share}>แชร์ลิงก์</button>
           <button onClick={onClose}>ปิด</button>
         </div>
-        <p className="card-hint">การแชร์ลิงก์นี้จะบันทึกข้อความไว้ใน URL</p>
+        <p className="card-hint">แชร์ลิงก์รวมชื่อและข้อความ; ข้อความจะถูกซ่อนจาก URL หลังเปิดหน้า</p>
       </div>
     </div>
   )
